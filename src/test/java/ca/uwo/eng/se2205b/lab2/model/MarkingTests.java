@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        MarkingTests.ModelTest.class,
         MarkingTests.StudentTests.class,
         MarkingTests.CourseTests.class,
         MarkingTests.DepartmentTest.class
@@ -113,6 +114,59 @@ public class MarkingTests {
         }
     }
 
+    /**
+     * Creates the model shown in
+     * <a href="https://uwoece-se2205b-2017.github.io/labs/02-oop-serialization#question-0">Q1 Deliverable</a>.
+     *
+     * @return List of Department values
+     */
+    public static List<Department> manualCorrectModel() {
+
+        Department cee = new RealDepartment("CEE");
+        Department ece = new RealDepartment("ECE");
+        Department am = new RealDepartment("AM");
+
+        Course am1413 = new RealCourse("Calculus I", "AM1413", am, 10);
+        Course es1022 = new RealCourse("Statics", "ES1022", cee, 10);
+        Course es1036 = new RealCourse("Programming I", "ES1036", ece, 10);
+        Course se2205 = new RealCourse("D&A", "SE2205", ece, 10);
+
+        WrappedStudent john = new WrappedStudent("John", "Smith", 1111L, cee);
+        john.addCourse(am1413);
+        john.addCourse(es1022);
+
+        WrappedStudent sarah = new WrappedStudent("Sarah", "McLachlan", 2222L, ece);
+        sarah.addCourse(am1413);
+        sarah.addCourse(es1036);
+        sarah.addCourse(se2205);
+
+        WrappedStudent gene = new WrappedStudent("Gene", "Wilder", 3333L, ece);
+        gene.addCourse(am1413);
+        gene.addCourse(se2205);
+
+        WrappedStudent ron = new WrappedStudent("Ron", "Weasley", 4444L, ece);
+        ron.addCourse(es1022);
+        ron.addCourse(se2205);
+
+        WrappedStudent minh = new WrappedStudent("Minh", "Pham", 5555L, ece);
+        minh.addCourse(am1413);
+        minh.addCourse(es1022);
+
+        WrappedStudent george = new WrappedStudent("George", "Takei", 6666L, am);
+        george.addCourse(am1413);
+        george.addCourse(se2205);
+
+        WrappedStudent ralph = new WrappedStudent("Ralph", "Nader", 7777L, am);
+        ralph.addCourse(am1413);
+        ralph.addCourse(es1022);
+        ralph.addCourse(es1036);
+        ralph.addCourse(se2205);
+
+        WrappedStudent jane = new WrappedStudent("Jane", "Tarzan", 8888L, ece);
+
+        return Arrays.asList(cee, ece, am);
+    }
+
     public static class Model {
 
         @Rule
@@ -143,8 +197,8 @@ public class MarkingTests {
 
         private final List<WrappedStudent> students;
 
-        Model() {
-            departments = ProvidedModelFactory.createModel();
+        Model(List<Department> departments) {
+            this.departments = departments;
 
             loadDepartments();
             loadCourses();
@@ -194,20 +248,20 @@ public class MarkingTests {
                 } else if (lowerName.contains("am") || lowerName.contains("applied") || lowerName.contains("math")) {
                     am = d;
                 } else {
-                    collector.checkThat("WARNING: Found unknown department: " + d + ", check spelling of names.", d, not(is(nullValue())));
+                    collector.checkThat("Found unknown department: " + d + ", check spelling of names.", d, not(is(nullValue())));
                 }
             }
 
-            collector.checkThat("WARNING: Could not find ECE department in model", ece, notNull());
-            collector.checkThat("WARNING: Could not find CEE department in model", cee, notNull());
-            collector.checkThat("WARNING: Could not find AM department in model", am, notNull());
+            collector.checkThat("Could not find ECE department in model", ece, notNull());
+            collector.checkThat("Could not find CEE department in model", cee, notNull());
+            collector.checkThat("Could not find AM department in model", am, notNull());
         }
 
         protected <T> List<T> loadList(String message, List<T> from) {
             if (message != null) {
-                collector.checkThat("WARNING: " + message, from, not(is(nullValue())));
+                collector.checkThat("" + message, from, not(is(nullValue())));
             } else {
-                collector.checkThat("WARNING: Found List that should be empty, not null", from, not(is(nullValue())));
+                collector.checkThat("Found List that should be empty, not null", from, not(is(nullValue())));
             }
             if (from == null) {
                 return Collections.emptyList();
@@ -234,7 +288,7 @@ public class MarkingTests {
 
                 for (Course c: courses) {
                     Function<Course, Course> loader = loadMap.get(c.getCourseCode().toUpperCase().trim().substring(0, 6));
-                    collector.checkThat("WARNING: Unknown course found: " + c, loader, not(is(nullValue())));
+                    collector.checkThat("Unknown course found: " + c, loader, not(is(nullValue())));
                     if (loader != null) {
                         loader.apply(c);
                     }
@@ -253,7 +307,7 @@ public class MarkingTests {
 
                         for (Course c: ws.getCourses()) {
                             Function<Course, Course> loader = loadMap.get(c.getCourseCode().toUpperCase().trim().substring(0, 6));
-                            collector.checkThat("WARNING: Unknown course found: " + c, loader, not(is(nullValue())));
+                            collector.checkThat("Unknown course found: " + c, loader, not(is(nullValue())));
                             if (loader != null) {
                                 loader.apply(c);
                             }
@@ -262,10 +316,10 @@ public class MarkingTests {
                 }
             }
 
-            collector.checkThat("WARNING: Could not find ES1022 in model", es1022, not(is(nullValue())));
-            collector.checkThat("WARNING: Could not find ES1036 in model", es1036, not(is(nullValue())));
-            collector.checkThat("WARNING: Could not find SE2205 in model", se2205, not(is(nullValue())));
-            collector.checkThat("WARNING: Could not find AM1413 in model", am1413, not(is(nullValue())));
+            collector.checkThat("Could not find ES1022 in model", es1022, not(is(nullValue())));
+            collector.checkThat("Could not find ES1036 in model", es1036, not(is(nullValue())));
+            collector.checkThat("Could not find SE2205 in model", se2205, not(is(nullValue())));
+            collector.checkThat("Could not find AM1413 in model", am1413, not(is(nullValue())));
         }
 
         private void loadStudents() {
@@ -286,7 +340,7 @@ public class MarkingTests {
                 for (Student s: students) {
                     WrappedStudent ws = new WrappedStudent(s);
                     Function<WrappedStudent, WrappedStudent> loader = loadMap.get(ws.getStudentId());
-                    collector.checkThat("WARNING: Unknown student found: " + s, loader, not(is(nullValue())));
+                    collector.checkThat("Unknown student found: " + s, loader, not(is(nullValue())));
                     if (loader != null) {
                         loader.apply(ws);
                     }
@@ -306,7 +360,7 @@ public class MarkingTests {
                         for (Student s: students) {
                             WrappedStudent ws = new WrappedStudent(s);
                             Function<WrappedStudent, WrappedStudent> loader = loadMap.get(ws.getStudentId());
-                            collector.checkThat("WARNING: Unknown student found: " + s, loader, not(is(nullValue())));
+                            collector.checkThat("Unknown student found: " + s, loader, not(is(nullValue())));
                             if (loader != null) {
                                 loader.apply(ws);
                             }
@@ -315,14 +369,14 @@ public class MarkingTests {
                 }
             }
 
-            collector.checkThat("WARNING: jsmith not found", jsmith, not(is(nullValue())));
-            collector.checkThat("WARNING: smclach not found", smclach, not(is(nullValue())));
-            collector.checkThat("WARNING: gwilder not found", gwilder, not(is(nullValue())));
-            collector.checkThat("WARNING: rweasle not found", rweasle, not(is(nullValue())));
-            collector.checkThat("WARNING: mpham not found", mpham, not(is(nullValue())));
-            collector.checkThat("WARNING: gtakei not found", gtakei, not(is(nullValue())));
-            collector.checkThat("WARNING: rnader not found", rnader, not(is(nullValue())));
-            collector.checkThat("WARNING: jtarzan not found", jtarzan, not(is(nullValue())));
+            collector.checkThat("jsmith not found", jsmith, not(is(nullValue())));
+            collector.checkThat("smclach not found", smclach, not(is(nullValue())));
+            collector.checkThat("gwilder not found", gwilder, not(is(nullValue())));
+            collector.checkThat("rweasle not found", rweasle, not(is(nullValue())));
+            collector.checkThat("mpham not found", mpham, not(is(nullValue())));
+            collector.checkThat("gtakei not found", gtakei, not(is(nullValue())));
+            collector.checkThat("rnader not found", rnader, not(is(nullValue())));
+            collector.checkThat("jtarzan not found", jtarzan, not(is(nullValue())));
         }
 
 
@@ -336,36 +390,54 @@ public class MarkingTests {
         assertEquals("Collections to not match in any order:\n" + expected + "\n\t!=\n" + actual, expected.size(), actual.size());
     }
 
-
-    public static class StudentTests extends Model {
-
-        @Test
-        public void names() {
-            WrappedStudent jsmith = getStudent(_i -> true);
-
-            assertEquals("First name incorrect", "John", jsmith.getFirstName());
-            assertEquals("Last name incorrect", "Smith", jsmith.getLastName());
-
-            jsmith.setFirstName("Bob");
-            assertEquals("Could not change First name", "Bob", jsmith.getFirstName());
-
-            jsmith.setLastName("Bob");
-            assertEquals("Could not change Last name", "Bob", jsmith.getLastName());
+    public static class ModelTest extends Model {
+        public ModelTest() {
+            super(ProvidedModelFactory.createModel());
         }
 
         @Test
-        public void courses() {
+        public void testModel() {
+            // nothing to do, init tests it
+        }
+    }
+
+    public static class StudentTests extends Model {
+
+        public StudentTests() {
+            super(manualCorrectModel());
+        }
+
+        @Test
+        public void name_get() {
+            WrappedStudent jsmith = new WrappedStudent("Bob", "Builder", 20L, null);
+
+            assertEquals("First name incorrect", "Bob", jsmith.getFirstName());
+            assertEquals("Last name incorrect", "Builder", jsmith.getLastName());
+        }
+
+        @Test
+        public void name_set() {
+            WrappedStudent jsmith = new WrappedStudent("Bob", "Builder", 20L, null);
+
+            jsmith.setFirstName("John");
+            assertEquals("Could not change First name", "John", jsmith.getFirstName());
+
+            jsmith.setLastName("Smith");
+            assertEquals("Could not change Last name", "Smith", jsmith.getLastName());
+        }
+
+        @Test(expected=UnsupportedOperationException.class)
+        public void courses_unmodifiable() {
+            WrappedStudent student = new WrappedStudent("Bob", "Builder", 1111L, null);
+            Course notEnrolledCourse = new RealCourse("name", "se2222", null, 5);
+
+            student.getCourses().add(notEnrolledCourse);
+        }
+
+        @Test
+        public void courses_add() {
             WrappedStudent student = getStudent(_i -> true);
-            WrappedStudent otherStudent = getStudent( Predicate.<WrappedStudent>isEqual(student).negate() );
-
             Course notEnrolledCourse = getCourse(c -> !loadList(student.getCourses()).contains(c));
-
-            try {
-                student.getCourses().add(notEnrolledCourse);
-                fail("Able to modify courses outside");
-            } catch (UnsupportedOperationException uoe) {
-                // expected
-            }
 
             List<Course> previous = new ArrayList<>(student.getCourses());
             previous.add(notEnrolledCourse);
@@ -378,18 +450,27 @@ public class MarkingTests {
             assertContains(previous, student.getCourses());
             assertContains(c_prevStudents, notEnrolledCourse.getEnrolledStudents());
 
-            // No change:
             student.addCourse(notEnrolledCourse);
 
             assertContains(previous, student.getCourses());
             assertContains(c_prevStudents, notEnrolledCourse.getEnrolledStudents());
+        }
 
-            student.dropCourse(notEnrolledCourse);
-            previous.remove(notEnrolledCourse);
-            c_prevStudents.remove(student.getBase());
+        @Test
+        public void courses_remove() {
+            WrappedStudent student = getStudent(s -> !loadList(s.getCourses()).isEmpty());
+            Course enrolled = student.getCourses().get(0);
+            Course notEnrolled = getCourse(c -> !loadList(student.getCourses()).contains(c));
 
+            List<Course> previous = new ArrayList<>(student.getCourses());
+            student.dropCourse(notEnrolled);
             assertContains(previous, student.getCourses());
-            assertContains(c_prevStudents, notEnrolledCourse.getEnrolledStudents());
+
+            List<Student> c_prevStudents = new ArrayList<>(notEnrolled.getEnrolledStudents());
+            student.dropCourse(enrolled);
+            previous.remove(enrolled);
+            assertContains(previous, student.getCourses());
+            assertContains(c_prevStudents, notEnrolled.getEnrolledStudents());
         }
 
         @Test
@@ -437,11 +518,24 @@ public class MarkingTests {
      */
     public static class CourseTests extends Model {
 
+        public CourseTests() {
+            super(manualCorrectModel());
+        }
+
         /**
          * Test the name property
          */
         @Test
-        public void name() {
+        public void name_get() {
+            Course course = getCourse(c -> c.getName().equals("Statics"));
+            assertEquals("Statics", course.getName());
+        }
+
+        /**
+         * Test the name property
+         */
+        @Test
+        public void name_set() {
             Course course = getCourse(_i -> true);
 
             course.setName("aaaa");
@@ -452,17 +546,32 @@ public class MarkingTests {
          * Test department interactions
          */
         @Test
-        public void department() {
-            Course course = getCourse(_i -> true);
-            Department dept = getDepartment(d -> loadList(d.getCourses()).contains(course));
-            assertEquals(dept, course.getDepartment());
+        public void department_get() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+            Course course = dept.getCourses().get(0);
 
+            assertEquals(dept, course.getDepartment());
+        }
+
+        @Test
+        public void department_set() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+            Course course = dept.getCourses().get(0);
             Department otherDept = getDepartment(d -> d != dept );
 
             course.setDepartment(otherDept);
             assertEquals(otherDept, course.getDepartment());
             assertTrue("Department does not contain course",
                     otherDept.getCourses().contains(course));
+
+            course.setDepartment(null);
+            assertNull("Can not make course homeless", course.getDepartment());
+        }
+
+        @Test
+        public void department_setNull() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+            Course course = dept.getCourses().get(0);
 
             course.setDepartment(null);
             assertNull("Can not make course homeless", course.getDepartment());
@@ -485,19 +594,22 @@ public class MarkingTests {
         /**
          * Test that adding/removing students behaves
          */
-        @Test
-        public void students() {
+        @Test(expected = UnsupportedOperationException.class)
+        public void students_add_fail() {
             Course course = getCourse(_i -> true);
             WrappedStudent studentNotEnrolled = getStudent(s -> !loadList(course.getEnrolledStudents()).contains(s.getBase()));
             Department dept = getDepartment(d -> loadList(d.getCourses()).contains(course));
             assertEquals(dept, course.getDepartment());
 
-            try {
-                course.getEnrolledStudents().add(studentNotEnrolled.getBase());
-                fail("Able to modify students outside methods");
-            } catch (UnsupportedOperationException uoe) {
-                // expected
-            }
+            course.getEnrolledStudents().add(studentNotEnrolled.getBase());
+        }
+
+        @Test
+        public void students_add() {
+            Course course = getCourse(_i -> true);
+            WrappedStudent studentNotEnrolled = getStudent(s -> !loadList(course.getEnrolledStudents()).contains(s.getBase()));
+            Department dept = getDepartment(d -> loadList(d.getCourses()).contains(course));
+            assertEquals(dept, course.getDepartment());
 
             List<Student> course_students = new ArrayList<>(course.getEnrolledStudents());
             List<Course> student_courses = new ArrayList<>(studentNotEnrolled.getCourses());
@@ -505,11 +617,6 @@ public class MarkingTests {
             course_students.add(studentNotEnrolled.getBase());
             student_courses.add(course);
 
-            course.enrollStudent(studentNotEnrolled.getBase());
-            assertContains(course_students, course.getEnrolledStudents());
-            assertContains(student_courses, studentNotEnrolled.getCourses());
-
-            // Should be no change
             course.enrollStudent(studentNotEnrolled.getBase());
             assertContains(course_students, course.getEnrolledStudents());
             assertContains(student_courses, studentNotEnrolled.getCourses());
@@ -527,6 +634,36 @@ public class MarkingTests {
             assertContains(course_students, course.getEnrolledStudents());
             assertContains(anotherStudent_courses, anotherNotEnrolled.getCourses());
             assertContains(student_courses, studentNotEnrolled.getCourses());
+
+        }
+
+        @Test
+        public void students_addNoChange() {
+            Course course = getCourse(c -> !loadList(c.getEnrolledStudents()).isEmpty());
+            WrappedStudent student = new WrappedStudent(loadList(course.getEnrolledStudents()).get(0));
+
+            List<Student> course_students = new ArrayList<>(course.getEnrolledStudents());
+            List<Course> student_courses = new ArrayList<>(student.getCourses());
+
+            // Should be no change
+            course.enrollStudent(student.getBase());
+            assertContains(course_students, course.getEnrolledStudents());
+            assertContains(student_courses, student.getCourses());
+        }
+
+        @Test
+        public void students_remove() {
+            Course course = getCourse(_i -> true);
+            WrappedStudent studentNotEnrolled = getStudent(s -> !loadList(course.getEnrolledStudents()).contains(s.getBase()));
+            Department dept = getDepartment(d -> loadList(d.getCourses()).contains(course));
+            assertEquals(dept, course.getDepartment());
+
+            List<Student> course_students = new ArrayList<>(course.getEnrolledStudents());
+            List<Course> student_courses = new ArrayList<>(studentNotEnrolled.getCourses());
+
+            WrappedStudent anotherNotEnrolled = getStudent(s ->
+                    s != studentNotEnrolled && !loadList(course.getEnrolledStudents()).contains(s.getBase()));
+            List<Course> anotherStudent_courses = new ArrayList<>(anotherNotEnrolled.getCourses());
 
             // Remove a student
             course_students.remove(studentNotEnrolled.getBase());
@@ -562,7 +699,34 @@ public class MarkingTests {
             assertContains(course_students, course.getEnrolledStudents());
             assertContains(student_courses, studentNotEnrolled.getCourses());
             assertContains(anotherStudent_courses, anotherNotEnrolled.getCourses());
+        }
 
+        @Test
+        public void students_invalidModification() {
+            Course course = getCourse(_i -> true);
+            WrappedStudent studentNotEnrolled = getStudent(s -> !loadList(course.getEnrolledStudents()).contains(s.getBase()));
+            Department dept = getDepartment(d -> loadList(d.getCourses()).contains(course));
+            assertEquals(dept, course.getDepartment());
+
+            List<Student> course_students = new ArrayList<>(course.getEnrolledStudents());
+            List<Course> student_courses = new ArrayList<>(studentNotEnrolled.getCourses());
+
+            WrappedStudent anotherNotEnrolled = getStudent(s ->
+                    s != studentNotEnrolled && !loadList(course.getEnrolledStudents()).contains(s.getBase()));
+            List<Course> anotherStudent_courses = new ArrayList<>(anotherNotEnrolled.getCourses());
+
+            // Make sure invalid modification doesn't change things
+            WrappedStudent definiteNotEnrolled = getStudent(s ->
+                    s != studentNotEnrolled && !course.getEnrolledStudents().contains(s.getBase()));
+            course.removeStudent(definiteNotEnrolled.getBase());
+
+            assertContains(course_students, course.getEnrolledStudents());
+            assertContains(student_courses, studentNotEnrolled.getCourses());
+            assertContains(anotherStudent_courses, anotherNotEnrolled.getCourses());
+        }
+
+        @Test
+        public void students_exception() {
             // Check the exception
             Course toBreak = new RealCourse("test", "te2222", null, 5);
             WrappedStudent student = null;
@@ -586,11 +750,24 @@ public class MarkingTests {
      */
     public static class DepartmentTest extends Model {
 
+        public DepartmentTest() {
+            super(manualCorrectModel());
+        }
+
         /**
          * Test the name property
          */
         @Test
-        public void name() {
+        public void name_get() {
+            Department dept = new RealDepartment("wat");
+            assertEquals("wat", dept.getName());
+        }
+
+        /**
+         * Test the name property
+         */
+        @Test
+        public void name_set() {
             Department dept = getDepartment(_i -> true);
             dept.setName("Bob");
             assertEquals("Bob", dept.getName());
@@ -600,7 +777,7 @@ public class MarkingTests {
          * Test course changes
          */
         @Test
-        public void courses() {
+        public void courses_remove() {
             Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
             Course ownedCourse = getCourse(c -> loadList(dept.getCourses()).contains(c));
 
@@ -642,10 +819,65 @@ public class MarkingTests {
         }
 
         /**
+         * Test course changes
+         */
+        @Test
+        public void courses_add() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+            Course unowned = getCourse(c -> !loadList(dept.getCourses()).contains(c));
+
+            List<Course> dept_courses = new ArrayList<>(dept.getCourses());
+
+            assertContains(dept_courses, dept.getCourses());
+
+            // Add a course
+            dept_courses.add(unowned);
+            dept.addCourse(unowned);
+            assertContains(dept_courses, dept.getCourses());
+
+            // Add the same course
+            dept.addCourse(unowned);
+            assertContains(dept_courses, dept.getCourses());
+        }
+
+        @Test
+        public void courses_move() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+            Course ownedCourse = getCourse(c -> loadList(dept.getCourses()).contains(c));
+
+            List<Course> dept_courses = new ArrayList<>(dept.getCourses());
+
+            Course otherCourse = getCourse(c -> !loadList(dept.getCourses()).contains(c));
+            Department otherDept = getDepartment(d -> loadList(d.getCourses()).contains(otherCourse));
+            List<Course> otherDeptCourses = new ArrayList<>(otherDept.getCourses());
+
+            dept_courses.add(otherCourse);
+            otherDeptCourses.remove(otherCourse);
+            dept.addCourse(otherCourse);
+
+            assertEquals(dept, otherCourse.getDepartment());
+            assertContains(Arrays.asList(ownedCourse, otherCourse), dept.getCourses());
+            assertContains(otherDeptCourses, otherDept.getCourses());
+
+            // check that if you remove from another dept, it doesn't affect this one
+            otherDept.removeCourse(ownedCourse);
+            assertEquals("Incorrect remove causes changes", dept, ownedCourse.getDepartment());
+        }
+
+        @Test(expected = UnsupportedOperationException.class)
+        public void courses_unmodifiable() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+
+            Course notOwned = getCourse(c -> !loadList(dept.getCourses()).contains(c));
+            dept.getCourses().add(notOwned);
+        }
+
+
+        /**
          * Test student changes
          */
         @Test
-        public void students() {
+        public void students_add() {
             WrappedStudent student = getStudent(_i -> true);
             WrappedStudent otherStudent = getStudent( s -> s != student && s.getDepartment() != student.getDepartment());
 
@@ -665,20 +897,74 @@ public class MarkingTests {
             assertEquals(dept, otherStudent.getDepartment());
             assertContains(dept_students, dept.getEnrolledStudents());
             assertContains(otherDept_students, otherDept.getEnrolledStudents());
+        }
+
+        /**
+         * Test student changes
+         */
+        @Test
+        public void students_removeInvalid() {
+            Department dept = getDepartment(d -> loadList(d.getEnrolledStudents()).size() >= 1);
+
+            WrappedStudent student = new WrappedStudent(dept.getEnrolledStudents().get(0));
+            Department otherDept = getDepartment(d -> d != dept);
+
+            List<Student> dept_students = new ArrayList<>(dept.getEnrolledStudents());
+            List<Student> otherDept_students = new ArrayList<>(otherDept.getEnrolledStudents());
 
             // Invalid remove:
-            otherDept.removeStudent(otherStudent.getBase());
-            assertEquals(dept, otherStudent.getDepartment());
+            otherDept.removeStudent(student.getBase());
+            assertEquals(dept, student.getDepartment());
             assertContains(dept_students, dept.getEnrolledStudents());
             assertContains(otherDept_students, otherDept.getEnrolledStudents());
+        }
+
+        /**
+         * Test student changes
+         */
+        @Test
+        public void students_remove() {
+            Department dept = getDepartment(d -> loadList(d.getEnrolledStudents()).size() >= 2);
+
+            WrappedStudent student = new WrappedStudent(dept.getEnrolledStudents().get(0));
+            WrappedStudent otherStudent = new WrappedStudent(dept.getEnrolledStudents().get(1));
+            WrappedStudent otherDeptStudent = getStudent( s -> s != student && s.getDepartment() != student.getDepartment());
+
+            Department otherDept = getDepartment(d -> loadList(d.getEnrolledStudents()).contains(otherDeptStudent.getBase()));
+
+            List<Student> dept_students = new ArrayList<>(dept.getEnrolledStudents());
+            List<Student> otherDept_students = new ArrayList<>(otherDept.getEnrolledStudents());
 
             // Valid remove:
-            dept_students.remove(otherStudent.getBase());
+            dept_students.remove(student.getBase());
 
-            dept.removeStudent(otherStudent.getBase());
-            assertNull(otherStudent.getDepartment());
+            dept.removeStudent(student.getBase());
+            assertNull(student.getDepartment());
             assertContains(dept_students, dept.getEnrolledStudents());
             assertContains(otherDept_students, otherDept.getEnrolledStudents());
+
+            // Remove dept via student
+            dept_students.remove(otherStudent.getBase());
+            otherStudent.setDepartment(null);
+
+            assertNull(student.getDepartment());
+            assertContains(dept_students, dept.getEnrolledStudents());
+            assertContains(otherDept_students, otherDept.getEnrolledStudents());
+        }
+
+        /**
+         * Test student changes
+         */
+        @Test
+        public void students_removeViaStudent() {
+            WrappedStudent student = getStudent(_i -> true);
+            WrappedStudent otherStudent = getStudent( s -> s != student && s.getDepartment() != student.getDepartment());
+
+            Department dept = getDepartment(d -> loadList(d.getEnrolledStudents()).contains(student.getBase()));
+            Department otherDept = getDepartment(d -> loadList(d.getEnrolledStudents()).contains(otherStudent.getBase()));
+
+            List<Student> dept_students = new ArrayList<>(dept.getEnrolledStudents());
+            List<Student> otherDept_students = new ArrayList<>(otherDept.getEnrolledStudents());
 
             // Remove dept via student
             dept_students.remove(student.getBase());
@@ -688,6 +974,13 @@ public class MarkingTests {
             assertNull(student.getDepartment());
             assertContains(dept_students, dept.getEnrolledStudents());
             assertContains(otherDept_students, otherDept.getEnrolledStudents());
+        }
+
+        @Test(expected = UnsupportedOperationException.class)
+        public void students_unmodifiable() {
+            Department dept = getDepartment(d -> !loadList(d.getCourses()).isEmpty());
+            WrappedStudent notOwned = getStudent(s -> !loadList(dept.getEnrolledStudents()).contains(s));
+            dept.getEnrolledStudents().add(notOwned.getBase());
         }
 
         @Test
